@@ -322,6 +322,17 @@ main {
   font-weight: 700;
 }
 
+.cell.given.active-step {
+  background: #fde68a;
+  box-shadow: inset 0 0 0 3px #f59e0b;
+  animation: pulse-step 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-step {
+  0%, 100% { box-shadow: inset 0 0 0 3px #f59e0b; }
+  50% { box-shadow: inset 0 0 0 3px #fbbf24; }
+}
+
 .cell.sum-cell {
   background: var(--cell-sum-bg);
 }

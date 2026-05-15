@@ -176,9 +176,50 @@
     input.setAttribute('aria-label', id);
     input.addEventListener('input', onInput);
     input.addEventListener('keydown', onKeyDown);
-    input.addEventListener('focus', () => input.select());
+    input.addEventListener('focus', () => {
+      input.select();
+      updateActiveStep(input);
+      setTimeout(() => {
+        try { input.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        catch (e) {}
+      }, 250);
+    });
     cell.appendChild(input);
     state.inputs.set(id, input);
+  }
+
+  function updateActiveStep(input) {
+    document.querySelectorAll('.cell.given.active-step').forEach((c) =>
+      c.classList.remove('active-step')
+    );
+    const p = parseId(input.dataset.id);
+    let i = -1;
+    let k = -1;
+    if (p.type === 'pp') {
+      k = p.k;
+      i = p.col - k;
+      if (i === state.N) i = state.N - 1;
+    } else if (p.type === 'carry') {
+      k = p.k;
+      i = p.col - k - 1;
+    } else {
+      return;
+    }
+    if (i < 0 || i >= state.N || k < 0 || k >= state.M) return;
+    const multCell = document.querySelector(
+      `.cell.given[data-given="multiplicand"][data-col="${i}"]`
+    );
+    const mrCell = document.querySelector(
+      `.cell.given[data-given="multiplier"][data-col="${k}"]`
+    );
+    if (multCell) multCell.classList.add('active-step');
+    if (mrCell) mrCell.classList.add('active-step');
+  }
+
+  function clearActiveStep() {
+    document.querySelectorAll('.cell.given.active-step').forEach((c) =>
+      c.classList.remove('active-step')
+    );
   }
 
   function buildGrid() {
@@ -203,6 +244,8 @@
     for (let c = cols - 1; c >= 0; c--) {
       if (c < N) {
         const cell = mkCell('cell given');
+        cell.dataset.given = 'multiplicand';
+        cell.dataset.col = String(c);
         cell.textContent = state.expected[makeId('multiplicand', null, c)] || '';
         grid.appendChild(cell);
       } else {
@@ -214,6 +257,8 @@
     for (let c = cols - 1; c >= 0; c--) {
       if (c < M) {
         const cell = mkCell('cell given divider-bottom');
+        cell.dataset.given = 'multiplier';
+        cell.dataset.col = String(c);
         cell.textContent = state.expected[makeId('multiplier', null, c)] || '';
         grid.appendChild(cell);
       } else {
