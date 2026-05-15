@@ -29,18 +29,18 @@
     </div>
 
     <div class="problem-entry">
-      <label class="entry-group">
-        <span class="entry-label">Your problem from your book:</span>
+      <span class="entry-label">Your problem from your book:</span>
+      <div class="entry-inputs">
         <input type="text" id="num-a" class="num-input" inputmode="numeric" maxlength="4" placeholder="?" autocomplete="off">
         <span class="times">×</span>
         <input type="text" id="num-b" class="num-input" inputmode="numeric" maxlength="4" placeholder="?" autocomplete="off">
         <span class="equals">= ?</span>
-      </label>
+      </div>
       <span class="entry-help">Type two numbers (up to 4 digits each) — the grid sets itself up automatically.</span>
     </div>
 
     <div class="controls">
-      <div class="random-group">
+      <div class="random-options">
         <span class="group-label">Or pick a random one:</span>
         <select id="digits-n" aria-label="Random multiplicand digits">
           <option value="1">1-digit</option>
@@ -55,15 +55,18 @@
           <option value="3">3-digit</option>
           <option value="4">4-digit</option>
         </select>
-        <button id="btn-new" type="button" class="primary">New random</button>
         <label class="checkbox">
           <input type="checkbox" id="allow-zeros">
           <span>Allow zeros</span>
         </label>
       </div>
 
-      <div class="action-group">
+      <div class="primary-actions">
+        <button id="btn-new" type="button" class="primary">New random</button>
         <button id="btn-check" type="button" class="primary big">Check my work</button>
+      </div>
+
+      <div class="secondary-actions">
         <button id="btn-hint" type="button" class="secondary" title="Fill the next cell for me">Hint</button>
         <button id="btn-show" type="button" class="secondary">Show answer</button>
         <button id="btn-reset" type="button" class="secondary">Reset</button>
