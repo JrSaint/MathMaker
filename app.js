@@ -74,28 +74,30 @@
     for (let c = 0; c < M; c++) expected[makeId('multiplier', null, c)] = String(rD[c]);
 
     const ppByCol = [];
+    const carryByCol = [];
 
     for (let k = 0; k < M; k++) {
       const d = rD[k];
-      let carry = 0;
       const pp = new Array(cols).fill(null);
       const carryRow = new Array(cols).fill(null);
 
       for (let i = 0; i < N; i++) {
-        const prod = mD[i] * d + carry;
-        const digit = prod % 10;
-        const nextCarry = Math.floor(prod / 10);
+        const prod = mD[i] * d;
+        const onesDigit = prod % 10;
+        const tensDigit = Math.floor(prod / 10);
         const col = i + k;
-        pp[col] = digit;
-        if (i < N - 1) {
-          if (nextCarry > 0) carryRow[col + 1] = nextCarry;
-        } else if (nextCarry > 0) {
-          pp[col + 1] = nextCarry;
+        pp[col] = onesDigit;
+        if (tensDigit > 0) {
+          if (i < N - 1) {
+            carryRow[col + 1] = tensDigit;
+          } else {
+            pp[col + 1] = tensDigit;
+          }
         }
-        carry = nextCarry;
       }
 
       ppByCol.push(pp);
+      carryByCol.push(carryRow);
 
       for (let c = k; c <= N + k; c++) {
         const key = makeId('pp', k, c);
@@ -112,8 +114,10 @@
       for (let c = 0; c < cols; c++) {
         let columnSum = addCarry;
         for (let k = 0; k < M; k++) {
-          const v = ppByCol[k][c];
-          if (v !== null) columnSum += v;
+          const pv = ppByCol[k][c];
+          if (pv !== null) columnSum += pv;
+          const cv = carryByCol[k][c];
+          if (cv !== null) columnSum += cv;
         }
         const digit = columnSum % 10;
         const nextAddCarry = Math.floor(columnSum / 10);
@@ -413,11 +417,7 @@
     const rD = digitsOf(state.multiplier, state.M);
     const a = mD[pair.i];
     const b = rD[pair.k];
-    let prevCarry = 0;
-    for (let j = 0; j < pair.i; j++) {
-      prevCarry = Math.floor((mD[j] * b + prevCarry) / 10);
-    }
-    const product = a * b + prevCarry;
+    const product = a * b;
     const correctOnes = product % 10;
     const correctTens = Math.floor(product / 10);
 
@@ -428,7 +428,7 @@
       return `Looks like the two digits got swapped — try flipping them.`;
     }
 
-    const sumValue = a + b + prevCarry;
+    const sumValue = a + b;
     const addOnes = sumValue % 10;
     const addTens = Math.floor(sumValue / 10);
     if (typedOnes === addOnes && typedTens === addTens &&
@@ -450,16 +450,21 @@
     if (!Number.isInteger(typedOnes) || !Number.isInteger(typedTens)) return null;
 
     const c = pair.c;
-    const ppVals = [];
+    const addends = [];
     for (let k = 0; k < state.M; k++) {
-      const v = state.expected[makeId('pp', k, c)];
-      if (v !== '' && v !== undefined) {
-        const n = parseInt(v, 10);
-        if (Number.isInteger(n)) ppVals.push(n);
+      const pv = state.expected[makeId('pp', k, c)];
+      if (pv !== '' && pv !== undefined) {
+        const n = parseInt(pv, 10);
+        if (Number.isInteger(n)) addends.push(n);
+      }
+      const cv = state.expected[makeId('carry', k, c)];
+      if (cv !== '' && cv !== undefined) {
+        const n = parseInt(cv, 10);
+        if (Number.isInteger(n)) addends.push(n);
       }
     }
     const addCarryVal = parseInt(state.expected[makeId('addcarry', null, c)] || '0', 10) || 0;
-    const total = ppVals.reduce((acc, v) => acc + v, 0) + addCarryVal;
+    const total = addends.reduce((acc, v) => acc + v, 0) + addCarryVal;
     const correctOnes = total % 10;
     const correctTens = Math.floor(total / 10);
 
@@ -470,8 +475,8 @@
       return `Looks like the two digits got swapped — try flipping them.`;
     }
 
-    if (ppVals.length >= 2) {
-      const product = ppVals.reduce((acc, v) => acc * v, 1);
+    if (addends.length >= 2) {
+      const product = addends.reduce((acc, v) => acc * v, 1);
       const mulOnes = product % 10;
       const mulTens = Math.floor(product / 10);
       if (typedOnes === mulOnes && typedTens === mulTens &&
@@ -647,44 +652,35 @@
     const mD = digitsOf(state.multiplicand, state.N);
     const rD = digitsOf(state.multiplier, state.M);
 
-    const carryBefore = (k, i) => {
-      let c = 0;
-      for (let j = 0; j < i; j++) {
-        c = Math.floor((mD[j] * rD[k] + c) / 10);
-      }
-      return c;
-    };
-
     if (p.type === 'pp') {
       const k = p.k;
       const i = p.col - k;
       if (i < state.N) {
         const a = mD[i];
         const b = rD[k];
-        const carry = carryBefore(k, i);
         const raw = a * b;
-        const total = raw + carry;
-        const write = total % 10;
-        const out = Math.floor(total / 10);
-        let msg = `${a} × ${b} = ${raw}`;
-        if (carry > 0) msg += `, plus the carry ${carry} = ${total}`;
-        msg += `. Write ${write}`;
+        const write = raw % 10;
+        const out = Math.floor(raw / 10);
+        let msg = `${a} × ${b} = ${raw}. Write ${write}`;
         if (out > 0) {
           msg += i < state.N - 1
-            ? `, and carry ${out} into the next column.`
-            : `, and put the ${out} in the next column on the left.`;
+            ? `, and write ${out} as the carry above the next column.`
+            : `, and write ${out} in the next box to the left.`;
         } else {
           msg += '.';
         }
         return msg;
       } else {
-        const finalCarry = carryBefore(k, state.N);
-        return `Bring down the carry ${finalCarry} as the next digit.`;
+        const lastA = mD[state.N - 1];
+        const lastB = rD[k];
+        const lastProd = lastA * lastB;
+        const lastTens = Math.floor(lastProd / 10);
+        return `From the last step: ${lastA} × ${lastB} = ${lastProd}. The ${lastTens} (tens digit) goes here.`;
       }
     }
 
     if (p.type === 'carry') {
-      return `That's the carry from the last multiplication. Write it above the next column.`;
+      return `That's the tens digit of the last multiplication. Write it above the next column.`;
     }
 
     if (p.type === 'sum') {
@@ -697,6 +693,8 @@
       for (let k = 0; k < state.M; k++) {
         const v = state.expected[makeId('pp', k, c)];
         if (v) { parts.push(v); total += parseInt(v, 10); }
+        const cv = state.expected[makeId('carry', k, c)];
+        if (cv) { parts.push(cv); total += parseInt(cv, 10); }
       }
       if (parts.length === 0) return 'This column has nothing to add — it stays blank.';
       const digit = total % 10;
