@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MathMaker">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Multi-digit multiplication practice for 3rd and 4th graders.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <title>MathMaker — Multi-digit Multiplication Practice</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-row">
+      <h1>MathMaker</h1>
+      <div class="score" title="Problems you have solved">
+        Solved: <span id="score-count">0</span>
+      </div>
+    </div>
+
+    <div class="problem-entry">
+      <label class="entry-group">
+        <span class="entry-label">Your problem from your book:</span>
+        <input type="text" id="num-a" class="num-input" inputmode="numeric" maxlength="4" placeholder="?" autocomplete="off">
+        <span class="times">×</span>
+        <input type="text" id="num-b" class="num-input" inputmode="numeric" maxlength="4" placeholder="?" autocomplete="off">
+        <span class="equals">= ?</span>
+      </label>
+      <span class="entry-help">Type two numbers (up to 4 digits each) — the grid sets itself up automatically.</span>
+    </div>
+
+    <div class="controls">
+      <div class="random-group">
+        <span class="group-label">Or pick a random one:</span>
+        <select id="digits-n" aria-label="Random multiplicand digits">
+          <option value="1">1-digit</option>
+          <option value="2" selected>2-digit</option>
+          <option value="3">3-digit</option>
+          <option value="4">4-digit</option>
+        </select>
+        <span class="times-sm">×</span>
+        <select id="digits-m" aria-label="Random multiplier digits">
+          <option value="1">1-digit</option>
+          <option value="2" selected>2-digit</option>
+          <option value="3">3-digit</option>
+          <option value="4">4-digit</option>
+        </select>
+        <button id="btn-new" type="button" class="primary">New random</button>
+        <label class="checkbox">
+          <input type="checkbox" id="allow-zeros">
+          <span>Allow zeros</span>
+        </label>
+      </div>
+
+      <div class="action-group">
+        <button id="btn-check" type="button" class="primary big">Check my work</button>
+        <button id="btn-hint" type="button" class="secondary" title="Fill the next cell for me">Hint</button>
+        <button id="btn-show" type="button" class="secondary">Show answer</button>
+        <button id="btn-reset" type="button" class="secondary">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="problem-label" id="problem-label" aria-live="polite"></div>
+    <div class="grid-scroll">
+      <div id="grid" class="grid" role="grid" aria-label="Multiplication work area"></div>
+    </div>
+    <div id="status" class="status" aria-live="polite"></div>
+    <details class="help">
+      <summary>How does the grid work?</summary>
+      <div class="help-body">
+        <p><span class="swatch swatch-given"></span> <strong>Blue cells</strong> at the top are your problem (the multiplicand and multiplier).</p>
+        <p><span class="swatch swatch-carry"></span> <strong>Yellow cells</strong> are where you write your carry-overs (the small numbers above the column).</p>
+        <p><span class="swatch swatch-input"></span> <strong>White cells</strong> are where you write your partial products.</p>
+        <p><span class="swatch swatch-sum"></span> <strong>Green cells</strong> at the bottom hold the final answer.</p>
+        <p><span class="swatch swatch-blocked"></span> <strong>Grey cells</strong> are blocked — no digit ever goes there. They just keep your columns lined up.</p>
+        <p>Each <strong>×</strong> partial-product row is where you write what you get when you multiply by one digit of the multiplier — the ones digit first, then tens, etc. The bottom <strong>+</strong> row is for the carries when you <em>add</em> the partial products to get the final answer.</p>
+        <p><strong>Each partial product is one whole number</strong>, so even its leftmost digit (when the last multiplication step has a carry) goes in the white box on the same row — that's why the leftmost cell above each partial product stays grey.</p>
+        <p>Start with the ones column on the right, then work left. Press <kbd>Check my work</kbd> to see how you did, or <kbd>Hint</kbd> to fill the next step.</p>
+        <p><strong>Allow zeros</strong> only affects <kbd>New random</kbd> problems. When off, every digit of the random number is 1–9. When on, random numbers can include zeros in the middle (like <code>305</code> or <code>2070</code>), which adds tougher cases like "multiply by 0" and "carry through a zero." It does not change anything you type yourself in <em>Your problem from your book</em>.</p>
+        <p><button type="button" id="btn-reset-score" class="link-button">Reset solved count</button></p>
+      </div>
+    </details>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
